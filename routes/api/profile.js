@@ -33,12 +33,80 @@ router.get(
 
         res.json(profile);
       })
-      .catch((err) => res.status(400).json(err));
+      .catch((err) =>
+        res.status(404).json({ profile: "No profile found for this user" })
+      );
   }
 );
 
+// @route         GET api/profile/all
+// @desc          Get all profiles
+// @access        Public
+router.get(
+  "/all",
+  (req, res) => {
+    const errors = {};
+
+    Profile.find()  
+      .populate("user", ["name", "avatar"])
+      .then((profile) => {
+        if (!profile) {
+          errors.noProfile = "No profile found";
+          return res.status(404).json(errors);
+        }
+
+        res.json(profile);
+      })
+      .catch((err) =>
+        res.status(404).json({ profile: "No profile found" })
+      );
+  }
+);
+
+// @route         GET api/profile/handle/:handle
+// @desc          Get Profile by handle
+// @access        Public
+router.get("/handle/:handle", (req, res) => {
+  const errors = {};
+
+  Profile.findOne({ handle: req.params.handle })
+    .populate("user", ["name", "avatar"])
+    .then((profile) => {
+      if (!profile) {
+        errors.noProfile = "No profile found for the handle";
+        return res.status(404).json(errors);
+      }
+
+      res.json(profile);
+    })
+    .catch((err) =>
+      res.status(404).json({ profile: "No profile found for the handle" })
+    );
+});
+
+// @route         GET api/profile/user/:user_id
+// @desc          Get User Profile by User Id
+// @access        Public
+router.get("/user/:user_id", (req, res) => {
+  const errors = {};
+
+  Profile.findOne({ user: req.params.user_id })
+    .populate("user", ["name", "avatar"])
+    .then((profile) => {
+      if (!profile) {
+        errors.noProfile = "No profile found for the user Id";
+        return res.status(404).json(errors);
+      }
+
+      res.json(profile);
+    })
+    .catch((err) =>
+      res.status(404).json({ profile: "No profile found for the user Id" })
+    );
+});
+
 // @route         Post api/profile
-// @desc          Creat or Edit user profile
+// @desc          Create or Edit user profile
 // @access        Private
 router.post(
   "/",
